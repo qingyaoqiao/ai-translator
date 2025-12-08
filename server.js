@@ -1,6 +1,3 @@
-// 在最最最开头加一行日志，证明 Node.js 进程启动了
-console.log("🔥 System booting up...");
-
 import express from 'express';
 import multer from 'multer';
 import path from 'path';
