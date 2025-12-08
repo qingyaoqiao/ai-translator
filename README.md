@@ -1,5 +1,3 @@
-好的，这是为您补完的 README 部分：
-
 # 🌍 AI 全能文档翻译机 (AI Document Translator)
 
 这是一个基于 Node.js + Python + DeepSeek/OpenAI API 的全能文档翻译工具。
