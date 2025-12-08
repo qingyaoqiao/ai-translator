@@ -14,30 +14,6 @@
 - **前端**：HTML/CSS (原生)
 - **AI**：OpenAI 接口 (推荐 DeepSeek V3)
 
-## 🚀 快速开始
-
-### 1. 环境准备
-确保你的电脑安装了：
-- [Node.js](https://nodejs.org/) (v16+)
-- [Python](https://www.python.org/) (3.8+)
-
-### 2. 安装依赖
-```bash
-# 1. 安装 Node.js 依赖
-npm install
-
-# 2. 安装 Python 依赖 (用于 PDF 转换)
-pip install pdf2docx
-
-3. 配置 API
-复制 env.example 为 .env，并填入你的 Key：
-API_KEY=sk-你的密钥
-BASE_URL=[https://api.deepseek.com/v1](https://api.deepseek.com/v1)
-
-4. 启动项目
-node server.js
-
-启动后访问：http://localhost:3000
-⚠️ 注意事项
+本人还没弄完……
  * 翻译后的 Word 文档如果提示“发现无法读取的内容”，请点击“是”进行修复即可正常查看。这是由于 XML 修改导致的正常现象。
 ---
