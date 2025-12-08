@@ -2,7 +2,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import { exec } from 'child_process';
 import util from 'util';
-import OpenAI from 'openai';
+import OpenAI from 'openai'; // 只引入，不初始化！
 import AdmZip from 'adm-zip';
 
 const execPromise = util.promisify(exec);
@@ -16,6 +16,8 @@ function escapeXml(unsafe) {
         .replace(/"/g, '&quot;').replace(/'/g, '&apos;');
 }
 
+// === 关键修改：工厂函数 ===
+// 只有调用这个函数时，才会检查 Key，防止启动时崩馈
 function createClient(apiKey, baseUrl) {
     return new OpenAI({ apiKey: apiKey, baseURL: baseUrl });
 }
@@ -80,14 +82,14 @@ async function translateDocx(inputPath, outputPath, client, modelName) {
     zip.writeZip(outputPath);
 }
 
-// 主入口：接收 modelName
+// 主入口：接收 apiKey, baseUrl, modelName
 export async function processFile(inputFile, outputDir, apiKey, baseUrl, modelName) {
     const ext = path.extname(inputFile).toLowerCase();
     const timestamp = Date.now();
     let finalFileName = ext === '.txt' ? `translated_${timestamp}.txt` : `translated_${timestamp}.docx`;
     const finalPath = path.join(outputDir, finalFileName);
 
-    // 创建客户端
+    // 1. 在这里才创建客户端！
     const client = createClient(apiKey, baseUrl);
     
     console.log(`📄 处理文件: ${path.basename(inputFile)} | 模型: ${modelName}`);
@@ -108,9 +110,11 @@ export async function processFile(inputFile, outputDir, apiKey, baseUrl, modelNa
         await translateDocx(inputFile, finalPath, client, modelName);
     } else if (ext === '.pdf') {
         const tempDocx = path.join(outputDir, `temp_${timestamp}.docx`);
-      // 在 Linux/Docker 环境下通常需要用 python3
+        
+        // 兼容 Linux/Docker 环境的 Python 调用
         const pythonCommand = process.platform === "win32" ? "python" : "python3";
         await execPromise(`${pythonCommand} converter.py "${inputFile}" "${tempDocx}"`);
+        
         await translateDocx(tempDocx, finalPath, client, modelName);
     } 
     return finalPath;
