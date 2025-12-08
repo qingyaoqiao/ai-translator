@@ -29,6 +29,10 @@ app.post('/upload', upload.single('file'), async (req, res) => {
     console.log(`收到文件: ${req.file.originalname}`);
 
     try {
+        // 从前端获取 Key 和 URL
+        const userApiKey = req.body.apiKey;
+        const userBaseUrl = req.body.baseUrl || "https://api.siliconflow.cn/v1";
+
         // 调用翻译引擎
         // req.file.path 是上传后的临时文件路径
         const outputDir = path.join(__dirname, 'downloads');
@@ -38,8 +42,8 @@ app.post('/upload', upload.single('file'), async (req, res) => {
         const inputPath = req.file.path + originalExt;
         await fs.promises.rename(req.file.path, inputPath);
 
-        // 开始翻译
-        const finalFilePath = await processFile(inputPath, outputDir);
+        // ⚠️ 关键修改：把 key 和 url 传进 processFile
+        const finalFilePath = await processFile(inputPath, outputDir, userApiKey, userBaseUrl);
         
         // 计算下载链接
         const downloadFilename = path.basename(finalFilePath);
