@@ -2,13 +2,13 @@ import fs from 'fs/promises';
 import path from 'path';
 import { exec } from 'child_process';
 import util from 'util';
-import OpenAI from 'openai'; // 只要引入类，不要在这里 new
+import OpenAI from 'openai';
 import AdmZip from 'adm-zip';
 
 const execPromise = util.promisify(exec);
 const CONCURRENCY_LIMIT = 10; 
 
-// 工具：清洗 XML
+// XML 清洗工具
 function escapeXml(unsafe) {
     if (!unsafe) return "";
     return unsafe.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
@@ -16,12 +16,11 @@ function escapeXml(unsafe) {
         .replace(/"/g, '&quot;').replace(/'/g, '&apos;');
 }
 
-// === 工厂函数：动态创建 OpenAI 客户端 ===
 function createClient(apiKey, baseUrl) {
     return new OpenAI({ apiKey: apiKey, baseURL: baseUrl });
 }
 
-// === B计划 ===
+// B计划：接收 client 和 modelName
 async function translateFallback(plainText, client, modelName) {
     plainText = plainText.replace(/\s+/g, ' ').trim();
     if (plainText.length < 1) return "";
@@ -37,7 +36,7 @@ async function translateFallback(plainText, client, modelName) {
     }
 }
 
-// === A计划 ===
+// A计划：接收 client 和 modelName
 async function translateXMLChunk(xmlChunk, client, modelName) {
     if (!xmlChunk.includes('<w:t')) return xmlChunk;
     const simpleText = xmlChunk.replace(/<[^>]+>/g, '').trim();
@@ -62,7 +61,6 @@ async function translateXMLChunk(xmlChunk, client, modelName) {
     }
 }
 
-// === Word 处理 ===
 async function translateDocx(inputPath, outputPath, client, modelName) {
     const zip = new AdmZip(inputPath);
     let contentXml = zip.readAsText("word/document.xml");
@@ -70,10 +68,7 @@ async function translateDocx(inputPath, outputPath, client, modelName) {
 
     if (matches) {
         const total = matches.length;
-        // 动态检测：如果用户用的是 deepseek，模型名不同；如果是 openai，可能是 gpt-4o
-        // 这里为了简单，我们做个简单的判断，或者你可以让用户在前台也输入模型名
-        // 默认尝试 deepseek-chat (v3)
-        console.log(`---> 启动翻译，并发数: ${CONCURRENCY_LIMIT}`);
+        console.log(`---> 启动翻译 (${modelName}), 并发数: ${CONCURRENCY_LIMIT}`);
 
         for (let i = 0; i < total; i += CONCURRENCY_LIMIT) {
             const batch = matches.slice(i, i + CONCURRENCY_LIMIT);
@@ -85,26 +80,17 @@ async function translateDocx(inputPath, outputPath, client, modelName) {
     zip.writeZip(outputPath);
 }
 
-// === 主入口 ===
-// 接收 apiKey 和 baseUrl
-export async function processFile(inputFile, outputDir, apiKey, baseUrl) {
+// 主入口：接收 modelName
+export async function processFile(inputFile, outputDir, apiKey, baseUrl, modelName) {
     const ext = path.extname(inputFile).toLowerCase();
     const timestamp = Date.now();
     let finalFileName = ext === '.txt' ? `translated_${timestamp}.txt` : `translated_${timestamp}.docx`;
     const finalPath = path.join(outputDir, finalFileName);
 
-    // 1. 创建该用户的专属客户端
+    // 创建客户端
     const client = createClient(apiKey, baseUrl);
     
-    // 2. 简单的模型猜测 (你也可以在前端加个输入框让用户填模型名)
-    // 如果 URL 包含 deepseek 或 siliconflow，通常用 deepseek-ai/DeepSeek-V3
-    // 否则默认 gpt-3.5-turbo
-    let modelName = "gpt-3.5-turbo";
-    if (baseUrl.includes("deepseek") || baseUrl.includes("siliconflow")) {
-        modelName = "deepseek-ai/DeepSeek-V3"; 
-    }
-
-    console.log(`处理文件: ${path.basename(inputFile)}, 使用模型: ${modelName}`);
+    console.log(`📄 处理文件: ${path.basename(inputFile)} | 模型: ${modelName}`);
 
     if (ext === '.txt') {
         const content = await fs.readFile(inputFile, 'utf-8');
