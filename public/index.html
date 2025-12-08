@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>AI 全能翻译站</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); text-align: center; width: 400px; }
+        h1 { color: #333; margin-bottom: 30px; }
+        .upload-box { border: 2px dashed #ccc; padding: 30px; border-radius: 8px; cursor: pointer; transition: 0.3s; }
+        .upload-box:hover { border-color: #007bff; background: #f9fbff; }
+        #fileInput { display: none; }
+        button { background: #007bff; color: white; border: none; padding: 12px 24px; border-radius: 6px; font-size: 16px; cursor: pointer; margin-top: 20px; width: 100%; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        #status { margin-top: 20px; color: #666; font-size: 14px; }
+        #downloadLink { display: none; margin-top: 20px; text-decoration: none; color: #007bff; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h1>🌍 AI 文档翻译</h1>
+    
+    <div class="upload-box" onclick="document.getElementById('fileInput').click()">
+        <p>点击或拖拽文件到这里</p >
+        <p style="font-size: 12px; color: #999;">支持 PDF / Word / TXT</p >
+    </div>
+    <input type="file" id="fileInput">
+    
+    <div id="fileName" style="margin-top: 10px; font-weight: bold;"></div>
+
+    <button id="btnTranslate" onclick="uploadFile()">开始翻译</button>
+    
+    <div id="status"></div>
+    <a id="downloadLink" href=" " target="_blank">⬇️ 下载翻译结果</a >
+</div>
+
+<script>
+    const fileInput = document.getElementById('fileInput');
+    const status = document.getElementById('status');
+    const btn = document.getElementById('btnTranslate');
+    const downloadLink = document.getElementById('downloadLink');
+
+    fileInput.onchange = () => {
+        if(fileInput.files.length > 0) {
+            document.getElementById('fileName').innerText = "已选择: " + fileInput.files[0].name;
+        }
+    };
+
+    async function uploadFile() {
+        if (fileInput.files.length === 0) return alert("请先选择文件！");
+        
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+
+        btn.disabled = true;
+        btn.innerText = "正在翻译中 (请耐心等待)...";
+        status.innerText = "正在上传并处理，大文件可能需要几分钟...";
+        downloadLink.style.display = 'none';
+
+        try {
+            const response = await fetch('/upload', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                status.innerText = "🎉 翻译完成！";
+                downloadLink.href = result.downloadUrl;
+                downloadLink.style.display = 'block';
+                downloadLink.innerText = "⬇️ 点击下载: " + result.downloadUrl.split('/').pop();
+            } else {
+                status.innerText = "❌ 失败: " + result.message;
+            }
+        } catch (error) {
+            status.innerText = "❌ 网络错误";
+        } finally {
+            btn.disabled = false;
+            btn.innerText = "开始翻译";
+        }
+    }
+</script>
+
+</body>
+</html>
