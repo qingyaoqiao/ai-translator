@@ -9,7 +9,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const port = 3000;
+// 优先使用云平台分配的 PORT，如果没有则使用 3000
+const port = process.env.PORT || 3000;
 
 // 配置上传
 const upload = multer({ dest: 'uploads/' });
@@ -46,6 +47,7 @@ app.post('/upload', upload.single('file'), async (req, res) => {
     }
 });
 
-app.listen(port, () => {
-    console.log(`\n🚀 服务器已启动: http://localhost:${port}`);
+// 增加 '0.0.0.0' 参数，确保不仅监听本地，也监听外部请求
+app.listen(port, '0.0.0.0', () => {
+    console.log(`\n🚀 服务器已启动，监听端口: ${port}`);
 });
