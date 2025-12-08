@@ -108,7 +108,9 @@ export async function processFile(inputFile, outputDir, apiKey, baseUrl, modelNa
         await translateDocx(inputFile, finalPath, client, modelName);
     } else if (ext === '.pdf') {
         const tempDocx = path.join(outputDir, `temp_${timestamp}.docx`);
-        await execPromise(`python converter.py "${inputFile}" "${tempDocx}"`);
+      // 在 Linux/Docker 环境下通常需要用 python3
+        const pythonCommand = process.platform === "win32" ? "python" : "python3";
+        await execPromise(`${pythonCommand} converter.py "${inputFile}" "${tempDocx}"`);
         await translateDocx(tempDocx, finalPath, client, modelName);
     } 
     return finalPath;
