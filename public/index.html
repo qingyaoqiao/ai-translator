@@ -9,49 +9,219 @@
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     
     <style>
-        /* 保持之前的 CSS 样式不变，这里为了节省篇幅省略重复的 CSS */
-        /* 请保留你上一版 index.html 里 <style> 到 </style> 之间的所有内容 */
-        /* 只需要新增下面这一点点针对 datalist 的微调 */
-        
         :root {
-            --bg-dark: #0a0a12; --card-bg: rgba(20, 20, 35, 0.7); 
-            --neon-cyan: #00f3ff; --neon-blue: #0066ff; --neon-purple: #bd00ff;
-            --text-primary: #e0e6ff; --text-secondary: #8a95b3;
-            --success: #00ff95; --error: #ff3860;
+            /* 核心科技色板 */
+            --bg-dark: #0a0a12;
+            --card-bg: rgba(20, 20, 35, 0.7);
+            --neon-cyan: #00f3ff;
+            --neon-blue: #0066ff;
+            --neon-purple: #bd00ff;
+            --text-primary: #e0e6ff;
+            --text-secondary: #8a95b3;
+            --success: #00ff95;
+            --error: #ff3860;
         }
+
         body {
-            font-family: 'Inter', sans-serif; background-color: var(--bg-dark);
-            background-image: radial-gradient(circle at 10% 20%, rgba(0, 243, 255, 0.1) 0%, transparent 40%), radial-gradient(circle at 90% 80%, rgba(189, 0, 255, 0.1) 0%, transparent 40%), linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            /* 科技感背景 */
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(0, 243, 255, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(189, 0, 255, 0.1) 0%, transparent 40%),
+                linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
             background-size: 100% 100%, 100% 100%, 20px 20px, 20px 20px;
-            color: var(--text-primary); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px;
+            color: var(--text-primary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
         }
-        .card { background: var(--card-bg); backdrop-filter: blur(12px); border: 1px solid rgba(0, 243, 255, 0.15); box-shadow: 0 0 40px rgba(0, 102, 255, 0.1); border-radius: 20px; padding: 40px; width: 100%; max-width: 480px; text-align: center; position: relative; overflow: hidden; }
-        .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--neon-cyan), var(--neon-purple)); box-shadow: 0 0 15px var(--neon-blue); }
-        h1 { font-weight: 600; letter-spacing: 1px; margin-bottom: 30px; display: flex; align-items: center; justify-content: center; gap: 10px; text-shadow: 0 0 10px rgba(0, 243, 255, 0.5); }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(0, 243, 255, 0.15);
+            box-shadow: 0 0 40px rgba(0, 102, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 480px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-purple));
+            box-shadow: 0 0 15px var(--neon-blue);
+        }
+
+        h1 {
+            font-weight: 600;
+            letter-spacing: 1px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
+            font-size: 1.5rem;
+        }
+
         h1 i { font-size: 1.2em; color: var(--neon-cyan); }
-        .settings-group { text-align: left; margin-bottom: 25px; background: rgba(0,0,0,0.2); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); }
-        .input-group { margin-bottom: 15px; } .input-group:last-child { margin-bottom: 0; }
-        label { display: flex; align-items: center; gap: 8px; font-size: 0.9em; color: var(--text-secondary); margin-bottom: 8px; font-family: 'JetBrains Mono', monospace; }
+
+        .settings-group {
+            text-align: left;
+            margin-bottom: 25px;
+            background: rgba(0,0,0,0.2);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .input-group { margin-bottom: 15px; }
+        .input-group:last-child { margin-bottom: 0; }
+
+        label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9em;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            font-family: 'JetBrains Mono', monospace;
+        }
         label i { color: var(--neon-blue); }
-        input[type="text"], input[type="password"] { width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(0, 243, 255, 0.2); border-radius: 8px; color: var(--text-primary); font-family: 'JetBrains Mono', monospace; transition: all 0.3s ease; box-sizing: border-box; }
-        input:focus { outline: none; border-color: var(--neon-cyan); box-shadow: 0 0 15px rgba(0, 243, 255, 0.3) inset; background: rgba(0, 243, 255, 0.05); }
+
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(0, 243, 255, 0.2);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.3) inset;
+            background: rgba(0, 243, 255, 0.05);
+        }
+
         .hint { font-size: 12px; color: var(--text-secondary); opacity: 0.7; margin-top: 5px;}
-        .upload-box { border: 2px dashed rgba(0, 243, 255, 0.3); background: rgba(0, 243, 255, 0.02); padding: 30px; border-radius: 16px; cursor: pointer; transition: all 0.3s ease; position: relative; }
-        .upload-box:hover, .upload-box.dragover { border-color: var(--neon-cyan); background: rgba(0, 243, 255, 0.08); box-shadow: 0 0 30px rgba(0, 243, 255, 0.2) inset; }
-        .upload-icon { font-size: 48px; color: var(--neon-blue); margin-bottom: 15px; transition: transform 0.3s; }
+
+        .upload-box {
+            border: 2px dashed rgba(0, 243, 255, 0.3);
+            background: rgba(0, 243, 255, 0.02);
+            padding: 30px;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .upload-box:hover, .upload-box.dragover {
+            border-color: var(--neon-cyan);
+            background: rgba(0, 243, 255, 0.08);
+            box-shadow: 0 0 30px rgba(0, 243, 255, 0.2) inset;
+        }
+        
+        .upload-icon {
+            font-size: 48px;
+            color: var(--neon-blue);
+            margin-bottom: 15px;
+            transition: transform 0.3s;
+        }
         .upload-box:hover .upload-icon { transform: translateY(-5px) scale(1.1); color: var(--neon-cyan); }
-        #fileName { margin-top: 15px; font-family: 'JetBrains Mono', monospace; font-size: 0.9em; color: var(--neon-cyan); }
-        .btn-tech { background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple)); color: white; border: none; padding: 15px 30px; border-radius: 50px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 25px; width: 100%; letter-spacing: 1px; transition: all 0.3s ease; box-shadow: 0 5px 20px rgba(0, 102, 255, 0.4); display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .btn-tech:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0, 102, 255, 0.6), 0 0 20px var(--neon-purple) inset; filter: brightness(1.1); }
-        .btn-tech:disabled { background: #2a2a3a; color: #666; box-shadow: none; cursor: not-allowed; }
-        #status { margin-top: 25px; min-height: 20px; font-weight: 500; }
+
+        #fileName { 
+            margin-top: 15px; 
+            font-family: 'JetBrains Mono', monospace; 
+            font-size: 0.9em; 
+            color: var(--neon-cyan);
+            min-height: 1.2em;
+        }
+
+        .btn-tech {
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 25px;
+            width: 100%;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(0, 102, 255, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-tech:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 102, 255, 0.6), 0 0 20px var(--neon-purple) inset;
+            filter: brightness(1.1);
+        }
+
+        .btn-tech:disabled {
+            background: #2a2a3a;
+            color: #666;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        #status { 
+            margin-top: 25px; 
+            min-height: 20px;
+            font-weight: 500;
+        }
         .status-loading i { animation: spin 1s linear infinite; color: var(--neon-cyan); }
         .status-success { color: var(--success); text-shadow: 0 0 10px rgba(0,255,149,0.4); }
         .status-error { color: var(--error); text-shadow: 0 0 10px rgba(255,56,96,0.4); }
-        #downloadLink { display: none; margin-top: 20px; text-decoration: none; padding: 12px 24px; background: rgba(0, 243, 255, 0.1); color: var(--neon-cyan); border: 1px solid var(--neon-cyan); border-radius: 8px; font-weight: bold; transition: all 0.3s; animation: pulse 2s infinite; }
-        #downloadLink:hover { background: var(--neon-cyan); color: var(--bg-dark); box-shadow: 0 0 20px var(--neon-cyan); }
+
+        #downloadLink {
+            display: none;
+            margin-top: 20px;
+            text-decoration: none;
+            padding: 12px 24px;
+            background: rgba(0, 243, 255, 0.1);
+            color: var(--neon-cyan);
+            border: 1px solid var(--neon-cyan);
+            border-radius: 8px;
+            font-weight: bold;
+            transition: all 0.3s;
+            animation: pulse 2s infinite;
+        }
+        #downloadLink:hover {
+            background: var(--neon-cyan);
+            color: var(--bg-dark);
+            box-shadow: 0 0 20px var(--neon-cyan);
+        }
+
         @keyframes spin { 100% { transform: rotate(360deg); } }
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(0, 243, 255, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(0, 243, 255, 0); } 100% { box-shadow: 0 0 0 0 rgba(0, 243, 255, 0); } }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 243, 255, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(0, 243, 255, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 243, 255, 0); }
+        }
     </style>
 </head>
 <body>
@@ -68,20 +238,19 @@
         <div class="input-group">
             <label><i class="ph-bold ph-key"></i> API 密钥 (Secret Key)</label>
             <input type="password" id="apiKey" placeholder="sk-...">
+            <div class="hint">* 您的密钥仅用于当次请求，不会被保存。</div>
         </div>
 
         <div class="input-group">
             <label><i class="ph-bold ph-brain"></i> AI 模型 (Model)</label>
             <input type="text" id="modelSelect" list="modelOptions" placeholder="选择或输入模型名称..." value="deepseek-ai/DeepSeek-V3">
             <datalist id="modelOptions">
-                <option value="deepseek-ai/DeepSeek-V3">DeepSeek V3 (硅基流动推荐)</option>
+                <option value="deepseek-ai/DeepSeek-V3">DeepSeek V3 (硅基流动)</option>
                 <option value="deepseek-chat">DeepSeek Chat (官方)</option>
-                <option value="gpt-4o">GPT-4o (OpenAI)</option>
+                <option value="gpt-4o">GPT-4o</option>
                 <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
-                <option value="claude-3-5-sonnet-20240620">Claude 3.5 Sonnet (需支持OpenAI协议的中转)</option>
-                <option value="gemini-1.5-pro-latest">Gemini 1.5 Pro (需支持OpenAI协议的中转)</option>
+                <option value="claude-3-5-sonnet-20240620">Claude 3.5 Sonnet</option>
             </datalist>
-            <div class="hint">* 支持 Claude/Gemini 等，前提是该 API 渠道支持 OpenAI 格式协议</div>
         </div>
     </div>
 
@@ -111,15 +280,33 @@
     const fileNameDisplay = document.getElementById('fileName');
 
     fileInput.onchange = () => {
-        if(fileInput.files.length > 0) fileNameDisplay.innerHTML = `<i class="ph-fill ph-file-text"></i> 已装载: ${fileInput.files[0].name}`;
+        if(fileInput.files.length > 0) {
+            fileNameDisplay.innerHTML = `<i class="ph-fill ph-file-text"></i> 已装载: ${fileInput.files[0].name}`;
+        } else {
+            fileNameDisplay.innerHTML = "";
+        }
     };
 
-    ['dragenter', 'dragover'].forEach(e => dropZone.addEventListener(e, (ev) => { ev.preventDefault(); dropZone.classList.add('dragover'); }));
-    ['dragleave', 'drop'].forEach(e => dropZone.addEventListener(e, (ev) => { ev.preventDefault(); dropZone.classList.remove('dragover'); }));
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropZone.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropZone.classList.add('dragover');
+        }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropZone.classList.remove('dragover');
+        }, false);
+    });
+
     dropZone.addEventListener('drop', (e) => {
-        e.preventDefault();
-        if (e.dataTransfer.files.length > 0) {
-            fileInput.files = e.dataTransfer.files;
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            fileInput.files = files;
             fileInput.onchange();
         }
     });
@@ -129,7 +316,7 @@
         
         const userKey = document.getElementById('apiKey').value.trim();
         const userUrl = document.getElementById('baseUrl').value.trim();
-        const userModel = document.getElementById('modelSelect').value.trim(); // 获取用户选的模型
+        const userModel = document.getElementById('modelSelect').value.trim();
 
         if (!userKey) return alert("请输入 API 密钥。");
         if (!userModel) return alert("请选择 AI 模型。");
@@ -138,16 +325,21 @@
         formData.append('file', fileInput.files[0]);
         formData.append('apiKey', userKey);
         formData.append('baseUrl', userUrl);
-        formData.append('model', userModel); // 发送模型参数
+        formData.append('model', userModel);
 
         btn.disabled = true;
         btn.innerHTML = '<i class="ph-bold ph-spinner-gap"></i> 神经网路处理中...';
         status.className = 'status-loading';
         status.innerHTML = `<i class="ph-bold ph-cpu"></i> 正在调用 ${userModel} 进行推理，请保持连接...`;
         downloadLink.style.display = 'none';
+        fileNameDisplay.style.opacity = '0.5';
 
         try {
-            const response = await fetch('/upload', { method: 'POST', body: formData });
+            const response = await fetch('/upload', {
+                method: 'POST',
+                body: formData
+            });
+            
             const result = await response.json();
             
             if (result.success) {
@@ -161,12 +353,14 @@
             }
         } catch (error) {
             status.className = 'status-error';
-            status.innerHTML = `<i class="ph-bold ph-warning-circle"></i> 任务失败: ${error.message}`;
+            status.innerHTML = `<i class="ph-bold ph-warning-circle"></i> 任务失败: ${error.message || '网络连接异常'}`;
         } finally {
             btn.disabled = false;
             btn.innerHTML = '<i class="ph-bold ph-rocket-launch"></i> 启动神经翻译引擎';
+            fileNameDisplay.style.opacity = '1';
         }
     }
 </script>
+
 </body>
 </html>
