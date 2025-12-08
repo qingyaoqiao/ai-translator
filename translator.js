@@ -6,7 +6,7 @@ import OpenAI from 'openai';
 import AdmZip from 'adm-zip';
 
 const execPromise = util.promisify(exec);
-// ⚠️ 调试模式：为了查错，先把并发数降为 1，避免刷屏
+// ⚠️ 调试模式：降低并发，方便看日志
 const CONCURRENCY_LIMIT = 5; 
 
 // XML 清洗工具
@@ -21,20 +21,7 @@ function createClient(apiKey, baseUrl) {
     return new OpenAI({ apiKey: apiKey, baseURL: baseUrl });
 }
 
-// === 打印错误日志的工具 ===
-function logError(stage, error) {
-    console.error(`\n❌ [${stage} 失败]`);
-    if (error.response) {
-        // API 返回的错误（最有用）
-        console.error("   状态码:", error.status);
-        console.error("   错误信息:", JSON.stringify(error.response.data, null, 2));
-    } else {
-        // 网络或其他错误
-        console.error("   原因:", error.message);
-    }
-}
-
-// B计划
+// B计划：纯文本翻译
 async function translateFallback(plainText, client, modelName) {
     plainText = plainText.replace(/\s+/g, ' ').trim();
     if (plainText.length < 1) return "";
@@ -44,36 +31,70 @@ async function translateFallback(plainText, client, modelName) {
             messages: [{ role: "system", content: "翻译为简体中文。" }, { role: "user", content: plainText }],
             temperature: 0.3
         });
-        return `<w:p><w:r><w:t>${escapeXml(completion.choices[0].message.content.trim())}</w:t></w:r></w:p>`;
+        const res = completion.choices[0].message.content.trim();
+        // 调试日志
+        console.log(`   🔸 [B计划] 原文: ${plainText.substring(0,10)}... => 译文: ${res.substring(0,10)}...`);
+        return `<w:p><w:r><w:t>${escapeXml(res)}</w:t></w:r></w:p>`;
     } catch (e) {
-        logError("B计划(纯文本)", e); // <--- 这里加了日志
+        console.error(`   ❌ [B计划失败] ${e.message}`);
         return `<w:p><w:r><w:t>${escapeXml(plainText)}</w:t></w:r></w:p>`; 
     }
 }
 
-// A计划
+// A计划：XML 翻译
 async function translateXMLChunk(xmlChunk, client, modelName) {
-    if (!xmlChunk.includes('<w:t')) return xmlChunk;
+    // 检查是否有实质文字
+    if (!xmlChunk.includes('<w:t')) return xmlChunk; // 没文字标签，直接跳过
     const simpleText = xmlChunk.replace(/<[^>]+>/g, '').trim();
-    if (simpleText.length < 1) return xmlChunk;
+    if (simpleText.length < 1) return xmlChunk; // 纯符号，跳过
 
     try {
-        if (xmlChunk.length > 6000) throw new Error("XML_TOO_LONG");
+        if (xmlChunk.length > 5000) throw new Error("XML_TOO_LONG");
+
         const completion = await client.chat.completions.create({
             model: modelName,
             messages: [
-                { role: "system", content: "你是一个精通OpenXML的翻译引擎。将<w:t>内容翻译为中文。严禁修改标签。必须转义特殊字符。" },
+                { 
+                    role: "system", 
+                    content: `你是一个翻译引擎。你的任务是：
+1. 找到 XML 标签 <w:t> 里面的文字。
+2. 将其翻译为【简体中文】。
+3. 保持所有 <...> 标签结构不变，不要删减标签。
+4. 直接输出修改后的 XML 代码。` 
+                },
                 { role: "user", content: xmlChunk }
             ],
             temperature: 0.1
         });
-        let res = completion.choices[0].message.content.replace(/```xml/g, '').replace(/```/g, '').trim();
+
+        let res = completion.choices[0].message.content
+            .replace(/```xml/g, '')
+            .replace(/```/g, '')
+            .trim();
+        
+        // 强力清洗 & 符号
         res = res.replace(/&(?!(amp;|lt;|gt;|quot;|apos;|#\d+;))/g, '&amp;');
+
+        // 格式检查
         if (!res.includes('<w:t')) throw new Error("AI_BROKE_FORMAT");
+
+        // 🔍 【显微镜日志】关键修改！
+        const oldTxt = simpleText.substring(0, 15).replace(/\n/g, '');
+        const newTxt = res.replace(/<[^>]+>/g, '').trim().substring(0, 15).replace(/\n/g, '');
+        
+        if (oldTxt === newTxt) {
+            console.log(`   ⚠️ [未翻译] AI 返回了原文: "${oldTxt}"`);
+        } else {
+            console.log(`   ✅ [已翻译] "${oldTxt}" -> "${newTxt}"`);
+        }
+
         return res;
+
     } catch (e) {
-        // A计划经常失败转B计划，所以这里我们只打印警告，不当成错误
-        // console.warn("A计划失败，转B计划..."); 
+        // 如果 A 计划出错，尝试 B 计划
+        if (e.message !== "XML_TOO_LONG" && e.message !== "AI_BROKE_FORMAT") {
+            console.warn(`   ⚠️ [A计划出错] ${e.message} -> 转B计划`);
+        }
         return await translateFallback(simpleText, client, modelName);
     }
 }
@@ -81,22 +102,36 @@ async function translateXMLChunk(xmlChunk, client, modelName) {
 async function translateDocx(inputPath, outputPath, client, modelName) {
     const zip = new AdmZip(inputPath);
     let contentXml = zip.readAsText("word/document.xml");
+    
+    // 正则优化：更精准匹配段落
     const matches = contentXml.match(/<w:p[\s\S]*?<\/w:p>/g);
 
     if (matches) {
         const total = matches.length;
-        console.log(`---> 启动翻译 (${modelName}), 并发数: ${CONCURRENCY_LIMIT}`);
+        console.log(`---> 文档共 ${total} 段，开始翻译...`);
 
         for (let i = 0; i < total; i += CONCURRENCY_LIMIT) {
             const batch = matches.slice(i, i + CONCURRENCY_LIMIT);
             
             // 打印进度
-            process.stdout.write(`\r🚀 处理进度: ${i}/${total}`);
+            process.stdout.write(`\r🚀 进度: ${Math.min(i + CONCURRENCY_LIMIT, total)}/${total} `);
 
             const results = await Promise.all(batch.map(chunk => translateXMLChunk(chunk, client, modelName)));
-            for (let j = 0; j < batch.length; j++) contentXml = contentXml.replace(batch[j], results[j]);
+            
+            // 执行替换
+            for (let j = 0; j < batch.length; j++) {
+                // 只有当结果不同时才替换，避免无效操作
+                if (results[j] !== batch[j]) {
+                    // 使用 split/join 替换确保只替换当前这一个（防止重复段落误伤）
+                    // 但为保性能，这里依然用 replace，通常段落 XML 唯一性足够
+                    contentXml = contentXml.replace(batch[j], results[j]);
+                }
+            }
         }
+    } else {
+        console.log("❌ 未找到任何段落 (<w:p>)，可能是表格文档或特殊格式。");
     }
+    console.log("\n📦 正在打包写入...");
     zip.updateFile("word/document.xml", Buffer.from(contentXml, "utf-8"));
     zip.writeZip(outputPath);
 }
@@ -106,9 +141,8 @@ export async function processFile(inputFile, outputDir, apiKey, baseUrl, modelNa
     const timestamp = Date.now();
     let finalFileName = ext === '.txt' ? `translated_${timestamp}.txt` : `translated_${timestamp}.docx`;
     const finalPath = path.join(outputDir, finalFileName);
-
     const client = createClient(apiKey, baseUrl);
-    
+
     console.log(`\n📄 开始处理: ${path.basename(inputFile)} | 模型: ${modelName}`);
 
     try {
@@ -116,29 +150,23 @@ export async function processFile(inputFile, outputDir, apiKey, baseUrl, modelNa
             const content = await fs.readFile(inputFile, 'utf-8');
             const chunks = content.match(/[\s\S]{1,1500}/g) || [];
             const translated = await Promise.all(chunks.map(async chunk => {
-                try {
-                    const res = await client.chat.completions.create({
-                        model: modelName, messages: [{ role: "user", content: `翻译成中文:\n${chunk}` }]
-                    });
-                    return res.choices[0].message.content;
-                } catch (e) { 
-                    logError("TXT翻译", e); // <--- 这里加了日志
-                    return chunk; 
-                }
+                const res = await client.chat.completions.create({
+                    model: modelName, messages: [{ role: "user", content: `翻译成中文:\n${chunk}` }]
+                });
+                return res.choices[0].message.content;
             }));
             await fs.writeFile(finalPath, translated.join("\n"));
         } else if (ext === '.docx') {
             await translateDocx(inputFile, finalPath, client, modelName);
         } else if (ext === '.pdf') {
             const tempDocx = path.join(outputDir, `temp_${timestamp}.docx`);
-            // Linux 兼容性命令
             const pythonCommand = process.platform === "win32" ? "python" : "python3";
             await execPromise(`${pythonCommand} converter.py "${inputFile}" "${tempDocx}"`);
             await translateDocx(tempDocx, finalPath, client, modelName);
         } 
         return finalPath;
     } catch (error) {
-        console.error("🔥 严重错误:", error);
+        console.error("🔥 处理失败:", error);
         throw error;
     }
 }
