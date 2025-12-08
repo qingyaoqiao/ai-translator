@@ -8,7 +8,7 @@ import fs from 'fs';
 import { processFile } from './translator.js';
 import { fileURLToPath } from 'url';
 
-// 捕获未处理的异常，防止程序静默闪退（关键！）
+// 捕获未处理的异常，防止程序静默闪退
 process.on('uncaughtException', (err) => {
     console.error('💥 未捕获的异常:', err);
 });
@@ -18,9 +18,9 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// === 端口配置 (关键修改) ===
-// Zeabur 会注入 PORT 环境变量，优先使用它。如果本地运行，则用 3000。
-const port = process.env.PORT || 3000;
+// === 🚨 关键修改：强制锁定端口为 3000 ===
+// 不要用 process.env.PORT，防止云平台分配了 8080 而我们还在监听 3000
+const port = 3000;
 
 const upload = multer({ dest: 'uploads/' });
 
@@ -31,6 +31,7 @@ app.post('/upload', upload.single('file'), async (req, res) => {
     if (!req.file) return res.status(400).send({ success: false, message: '没有上传文件' });
     try {
         const { apiKey, baseUrl, model } = req.body;
+        // 默认参数兜底
         const userBaseUrl = baseUrl || "https://api.siliconflow.cn/v1";
         const userModel = model || "deepseek-ai/DeepSeek-V3";
         
