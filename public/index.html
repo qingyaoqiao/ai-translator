@@ -3,187 +3,226 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI 智能文档翻译枢纽</title>
+    <title>文档翻译小助手</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     
     <style>
         :root {
-            /* 核心科技色板 */
-            --bg-dark: #0a0a12;
-            --card-bg: rgba(20, 20, 35, 0.7);
-            --neon-cyan: #00f3ff;
-            --neon-blue: #0066ff;
-            --neon-purple: #bd00ff;
-            --text-primary: #e0e6ff;
-            --text-secondary: #8a95b3;
-            --success: #00ff95;
-            --error: #ff3860;
+            /* 奶油配方色板 */
+            --bg-warm: #F7F5F2;
+            --card-white: rgba(255, 255, 255, 0.85);
+            --text-main: #595959;
+            --text-sub: #9E9E9E;
+            --accent-warm: #FFB3A7; /* 柔和的珊瑚粉 */
+            --accent-gradient: linear-gradient(135deg, #FFD1A9 0%, #FAD0C4 100%); /* 奶杏渐变 */
+            --input-bg: #F0F2F5;
+            --shadow-float: 0px 10px 25px rgba(0,0,0,0.05);
+            --shadow-soft: 0px 2px 6px rgba(0,0,0,0.03);
+            --radius-card: 32px;
+            --radius-input: 16px;
+            --radius-btn: 50px;
         }
 
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-dark);
-            /* 科技感背景 */
-            background-image: 
-                radial-gradient(circle at 10% 20%, rgba(0, 243, 255, 0.1) 0%, transparent 40%),
-                radial-gradient(circle at 90% 80%, rgba(189, 0, 255, 0.1) 0%, transparent 40%),
-                linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-            background-size: 100% 100%, 100% 100%, 20px 20px, 20px 20px;
-            color: var(--text-primary);
+            font-family: 'Nunito', 'PingFang SC', sans-serif; /* 使用圆润字体 */
+            background-color: var(--bg-warm);
+            color: var(--text-main);
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             margin: 0;
             padding: 20px;
+            /* 柔光背景氛围 */
+            background-image: 
+                radial-gradient(circle at 15% 15%, rgba(255, 209, 169, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 85% 85%, rgba(250, 208, 196, 0.15) 0%, transparent 50%);
         }
 
         .card {
-            background: var(--card-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(0, 243, 255, 0.15);
-            box-shadow: 0 0 40px rgba(0, 102, 255, 0.1);
-            border-radius: 20px;
+            background: var(--card-white);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: var(--shadow-float), var(--shadow-soft);
+            border-radius: var(--radius-card);
             padding: 40px;
             width: 100%;
-            max-width: 480px;
+            max-width: 460px;
             text-align: center;
             position: relative;
-            overflow: hidden;
+            transition: transform 0.3s ease;
         }
 
-        .card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-purple));
-            box-shadow: 0 0 15px var(--neon-blue);
+        .card:hover {
+            transform: translateY(-5px); /* 轻微悬浮反馈 */
         }
 
         h1 {
-            font-weight: 600;
-            letter-spacing: 1px;
-            margin-bottom: 30px;
+            font-weight: 700;
+            margin-bottom: 25px;
+            color: var(--text-main);
+            font-size: 1.6rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
-            text-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
-            font-size: 1.5rem;
+            gap: 12px;
         }
 
-        h1 i { font-size: 1.2em; color: var(--neon-cyan); }
+        .emoji-icon {
+            font-size: 1.4em;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+        }
 
         .settings-group {
             text-align: left;
-            margin-bottom: 25px;
-            background: rgba(0,0,0,0.2);
-            padding: 20px;
-            border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.05);
+            margin-bottom: 20px;
+            background: rgba(255,255,255,0.5);
+            padding: 24px;
+            border-radius: 24px;
+            border: 1px solid rgba(255,255,255,0.8);
         }
 
-        .input-group { margin-bottom: 15px; }
+        .input-group { margin-bottom: 18px; position: relative; }
         .input-group:last-child { margin-bottom: 0; }
 
         label {
             display: flex;
             align-items: center;
             gap: 8px;
-            font-size: 0.9em;
-            color: var(--text-secondary);
+            font-size: 0.95em;
+            color: var(--text-main);
             margin-bottom: 8px;
-            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
         }
-        label i { color: var(--neon-blue); }
-
+        
         input[type="text"], input[type="password"] {
             width: 100%;
-            padding: 12px;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(0, 243, 255, 0.2);
-            border-radius: 8px;
-            color: var(--text-primary);
-            font-family: 'JetBrains Mono', monospace;
+            padding: 14px 16px;
+            background: var(--input-bg);
+            border: 2px solid transparent;
+            border-radius: var(--radius-input);
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 14px;
             transition: all 0.3s ease;
             box-sizing: border-box;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
         }
         
         input:focus {
             outline: none;
-            border-color: var(--neon-cyan);
-            box-shadow: 0 0 15px rgba(0, 243, 255, 0.3) inset;
-            background: rgba(0, 243, 255, 0.05);
+            background: #fff;
+            border-color: #FAD0C4;
+            box-shadow: 0 0 0 4px rgba(250, 208, 196, 0.2);
         }
 
-        .hint { font-size: 12px; color: var(--text-secondary); opacity: 0.7; margin-top: 5px;}
+        /* 记忆配置开关区域 */
+        .remember-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            margin-bottom: 15px;
+            gap: 8px;
+            font-size: 12px;
+            color: var(--text-sub);
+            cursor: pointer;
+        }
+        .toggle-checkbox {
+            appearance: none;
+            width: 36px;
+            height: 20px;
+            background: #E0E0E0;
+            border-radius: 20px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .toggle-checkbox::after {
+            content: '';
+            position: absolute;
+            top: 2px; left: 2px;
+            width: 16px; height: 16px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        .toggle-checkbox:checked {
+            background: #FFB3A7;
+        }
+        .toggle-checkbox:checked::after {
+            transform: translateX(16px);
+        }
 
         .upload-box {
-            border: 2px dashed rgba(0, 243, 255, 0.3);
-            background: rgba(0, 243, 255, 0.02);
-            padding: 30px;
-            border-radius: 16px;
+            border: 2px dashed #E0E0E0;
+            background: #FAFAFA;
+            padding: 25px;
+            border-radius: 24px;
             cursor: pointer;
             transition: all 0.3s ease;
             position: relative;
+            overflow: hidden;
         }
 
         .upload-box:hover, .upload-box.dragover {
-            border-color: var(--neon-cyan);
-            background: rgba(0, 243, 255, 0.08);
-            box-shadow: 0 0 30px rgba(0, 243, 255, 0.2) inset;
+            border-color: var(--accent-warm);
+            background: #FFF9F7;
+            transform: scale(1.02);
         }
         
-        .upload-icon {
-            font-size: 48px;
-            color: var(--neon-blue);
-            margin-bottom: 15px;
-            transition: transform 0.3s;
+        .upload-icon-wrapper {
+            font-size: 42px;
+            margin-bottom: 10px;
+            animation: float 3s ease-in-out infinite;
         }
-        .upload-box:hover .upload-icon { transform: translateY(-5px) scale(1.1); color: var(--neon-cyan); }
 
         #fileName { 
             margin-top: 15px; 
-            font-family: 'JetBrains Mono', monospace; 
             font-size: 0.9em; 
-            color: var(--neon-cyan);
+            color: #FF8E8E;
+            font-weight: 600;
             min-height: 1.2em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
         }
 
-        .btn-tech {
-            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
-            color: white;
+        .btn-soft {
+            background: var(--accent-gradient);
+            color: #5d4037; /* 暖棕色字体 */
             border: none;
-            padding: 15px 30px;
-            border-radius: 50px;
+            padding: 16px 30px;
+            border-radius: var(--radius-btn);
             font-size: 16px;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
-            margin-top: 25px;
+            margin-top: 20px;
             width: 100%;
-            letter-spacing: 1px;
-            transition: all 0.3s ease;
-            box-shadow: 0 5px 20px rgba(0, 102, 255, 0.4);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Q弹贝塞尔曲线 */
+            box-shadow: 0 8px 20px rgba(255, 179, 167, 0.3);
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
         }
 
-        .btn-tech:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 102, 255, 0.6), 0 0 20px var(--neon-purple) inset;
-            filter: brightness(1.1);
+        .btn-soft:hover:not(:disabled) {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 12px 25px rgba(255, 179, 167, 0.4);
         }
 
-        .btn-tech:disabled {
-            background: #2a2a3a;
-            color: #666;
+        .btn-soft:active:not(:disabled) {
+            transform: scale(0.98);
+        }
+
+        .btn-soft:disabled {
+            background: #E0E0E0;
+            color: #9E9E9E;
             box-shadow: none;
             cursor: not-allowed;
         }
@@ -191,84 +230,111 @@
         #status { 
             margin-top: 25px; 
             min-height: 20px;
-            font-weight: 500;
+            font-size: 0.95em;
+            color: var(--text-sub);
         }
-        .status-loading i { animation: spin 1s linear infinite; color: var(--neon-cyan); }
-        .status-success { color: var(--success); text-shadow: 0 0 10px rgba(0,255,149,0.4); }
-        .status-error { color: var(--error); text-shadow: 0 0 10px rgba(255,56,96,0.4); }
+        
+        .status-loading { color: var(--accent-warm); }
+        .status-loading i { animation: spin 1.5s linear infinite; }
+        
+        .status-success { 
+            color: #4CAF50; 
+            background: rgba(76, 175, 80, 0.1);
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+        }
+        
+        .status-error { 
+            color: #FF5252;
+            background: rgba(255, 82, 82, 0.1);
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+        }
 
         #downloadLink {
             display: none;
             margin-top: 20px;
             text-decoration: none;
-            padding: 12px 24px;
-            background: rgba(0, 243, 255, 0.1);
-            color: var(--neon-cyan);
-            border: 1px solid var(--neon-cyan);
-            border-radius: 8px;
-            font-weight: bold;
+            padding: 14px 24px;
+            background: white;
+            color: var(--text-main);
+            border: 2px solid #F0F0F0;
+            border-radius: var(--radius-btn);
+            font-weight: 700;
             transition: all 0.3s;
-            animation: pulse 2s infinite;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
         }
         #downloadLink:hover {
-            background: var(--neon-cyan);
-            color: var(--bg-dark);
-            box-shadow: 0 0 20px var(--neon-cyan);
+            border-color: var(--accent-warm);
+            color: var(--accent-warm);
+            transform: translateY(-2px);
         }
 
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(0, 243, 255, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(0, 243, 255, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(0, 243, 255, 0); }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+            100% { transform: translateY(0px); }
         }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* 隐藏的文件输入 */
+        input[type="file"] { display: none; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h1><i class="ph-bold ph-translate"></i> AI 智能文档翻译枢纽</h1>
+    <h1><span class="emoji-icon">✨</span> 智能翻译小助手</h1>
     
     <div class="settings-group">
+        <!-- 记忆配置开关 -->
+        <label class="remember-toggle">
+            <input type="checkbox" id="saveConfig" class="toggle-checkbox">
+            <span>记住我的 API 搭配</span>
+        </label>
+
         <div class="input-group">
-            <label><i class="ph-bold ph-link"></i> API 端点 (Base URL)</label>
-            <input type="text" id="baseUrl" placeholder="https://api.deepseek.com" value="https://api.siliconflow.cn/v1">
+            <label><span class="emoji-icon">🌐</span> API 地址 (Base URL)</label>
+            <input type="text" id="baseUrl" placeholder="https://api.siliconflow.cn/v1">
         </div>
         
         <div class="input-group">
-            <label><i class="ph-bold ph-key"></i> API 密钥 (Secret Key)</label>
+            <label><span class="emoji-icon">🔑</span> API 密钥 (Key)</label>
             <input type="password" id="apiKey" placeholder="sk-...">
-            <div class="hint">* 您的密钥仅用于当次请求，不会被保存。</div>
         </div>
 
         <div class="input-group">
-            <label><i class="ph-bold ph-brain"></i> AI 模型 (Model)</label>
-            <input type="text" id="modelSelect" list="modelOptions" placeholder="选择或输入模型名称..." value="deepseek-ai/DeepSeek-V3">
+            <label><span class="emoji-icon">🧠</span> AI 模型 (Model)</label>
+            <input type="text" id="modelSelect" list="modelOptions" placeholder="输入或选择模型..." value="deepseek-ai/DeepSeek-V3">
             <datalist id="modelOptions">
-                <option value="deepseek-ai/DeepSeek-V3">DeepSeek V3 (硅基流动)</option>
-                <option value="deepseek-chat">DeepSeek Chat (官方)</option>
+                <option value="deepseek-ai/DeepSeek-V3">DeepSeek V3</option>
+                <option value="deepseek-chat">DeepSeek Chat</option>
                 <option value="gpt-4o">GPT-4o</option>
-                <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
                 <option value="claude-3-5-sonnet-20240620">Claude 3.5 Sonnet</option>
             </datalist>
         </div>
     </div>
 
     <div class="upload-box" id="dropZone" onclick="document.getElementById('fileInput').click()">
-        <i class="ph-duotone ph-cloud-arrow-up upload-icon"></i>
-        <p style="font-size: 1.1em; margin: 10px 0;">点击或拖拽文件至此</p >
-        <p style="font-size: 0.9em; color: var(--text-secondary); font-family: 'JetBrains Mono'">支持格式: PDF / DOCX / TXT</p >
+        <div class="upload-icon-wrapper">
+            <!-- 替换为更可爱的云朵图标 -->
+            <span class="emoji-icon">☁️</span>
+        </div>
+        <p style="font-size: 1.05em; margin: 8px 0; font-weight: 600;">把文件拖进来，或者点我上传</p >
+        <p style="font-size: 0.85em; color: var(--text-sub);">支持 PDF / DOCX / TXT 格式</p >
     </div>
-    <input type="file" id="fileInput" style="display: none;">
+    <input type="file" id="fileInput">
     
     <div id="fileName"></div>
 
-    <button id="btnTranslate" class="btn-tech" onclick="uploadFile()">
-        <i class="ph-bold ph-rocket-launch"></i> 启动神经翻译引擎
+    <button id="btnTranslate" class="btn-soft" onclick="handleTranslate()">
+        <span class="emoji-icon">🚀</span> 开始魔法翻译
     </button>
     
     <div id="status"></div>
-    <a id="downloadLink" href=" " target="_blank"></a >
+    <a id="downloadLink" href="#" target="_blank"></a>
 </div>
 
 <script>
@@ -278,27 +344,72 @@
     const btn = document.getElementById('btnTranslate');
     const downloadLink = document.getElementById('downloadLink');
     const fileNameDisplay = document.getElementById('fileName');
+    
+    // 配置相关元素
+    const saveConfigToggle = document.getElementById('saveConfig');
+    const baseUrlInput = document.getElementById('baseUrl');
+    const apiKeyInput = document.getElementById('apiKey');
+    const modelInput = document.getElementById('modelSelect');
 
+    // 1. 页面加载时：检查本地存储
+    window.addEventListener('DOMContentLoaded', () => {
+        const savedConfig = localStorage.getItem('translation_api_config');
+        if (savedConfig) {
+            const config = JSON.parse(savedConfig);
+            baseUrlInput.value = config.baseUrl || '';
+            apiKeyInput.value = config.apiKey || '';
+            modelInput.value = config.model || '';
+            saveConfigToggle.checked = true; // 如果有存档，默认视为开启
+        }
+    });
+
+    // 2. 保存配置的函数
+    function saveConfiguration() {
+        if (saveConfigToggle.checked) {
+            const config = {
+                baseUrl: baseUrlInput.value.trim(),
+                apiKey: apiKeyInput.value.trim(),
+                model: modelInput.value.trim()
+            };
+            localStorage.setItem('translation_api_config', JSON.stringify(config));
+        } else {
+            localStorage.removeItem('translation_api_config');
+        }
+    }
+
+    // 监听开关变化，如果关闭则立即清除
+    saveConfigToggle.addEventListener('change', () => {
+        if (!saveConfigToggle.checked) {
+            localStorage.removeItem('translation_api_config');
+        } else {
+            // 如果开启，立即保存当前已有内容
+            saveConfiguration();
+        }
+    });
+
+    // 文件相关逻辑
     fileInput.onchange = () => {
         if(fileInput.files.length > 0) {
-            fileNameDisplay.innerHTML = `<i class="ph-fill ph-file-text"></i> 已装载: ${fileInput.files[0].name}`;
+            fileNameDisplay.innerHTML = `<span class="emoji-icon">📄</span> 已准备好: ${fileInput.files[0].name}`;
+            dropZone.style.borderColor = '#FFB3A7';
+            dropZone.style.background = '#FFF5F2';
         } else {
             fileNameDisplay.innerHTML = "";
+            dropZone.style.borderColor = '#E0E0E0';
+            dropZone.style.background = '#FAFAFA';
         }
     };
 
     ['dragenter', 'dragover'].forEach(eventName => {
         dropZone.addEventListener(eventName, (e) => {
-            e.preventDefault();
-            e.stopPropagation();
+            e.preventDefault(); e.stopPropagation();
             dropZone.classList.add('dragover');
         }, false);
     });
 
     ['dragleave', 'drop'].forEach(eventName => {
         dropZone.addEventListener(eventName, (e) => {
-            e.preventDefault();
-            e.stopPropagation();
+            e.preventDefault(); e.stopPropagation();
             dropZone.classList.remove('dragover');
         }, false);
     });
@@ -311,15 +422,18 @@
         }
     });
 
-    async function uploadFile() {
-        if (fileInput.files.length === 0) return alert("请先装载需要翻译的文档！");
-        
-        const userKey = document.getElementById('apiKey').value.trim();
-        const userUrl = document.getElementById('baseUrl').value.trim();
-        const userModel = document.getElementById('modelSelect').value.trim();
+    async function handleTranslate() {
+        // 在点击翻译时，尝试保存配置
+        saveConfiguration();
 
-        if (!userKey) return alert("请输入 API 密钥。");
-        if (!userModel) return alert("请选择 AI 模型。");
+        if (fileInput.files.length === 0) return alert("请先投喂一个文档给小助手~ 📁");
+        
+        const userKey = apiKeyInput.value.trim();
+        const userUrl = baseUrlInput.value.trim();
+        const userModel = modelInput.value.trim();
+
+        if (!userKey) return alert("还需要填入 API Key 🔑 哦");
+        if (!userModel) return alert("请选择一个聪明的 AI 模型 🧠");
 
         const formData = new FormData();
         formData.append('file', fileInput.files[0]);
@@ -327,14 +441,16 @@
         formData.append('baseUrl', userUrl);
         formData.append('model', userModel);
 
+        // UI 状态更新
         btn.disabled = true;
-        btn.innerHTML = '<i class="ph-bold ph-spinner-gap"></i> 神经网路处理中...';
+        btn.innerHTML = '<span class="emoji-icon">✨</span> 正在努力思考中...';
         status.className = 'status-loading';
-        status.innerHTML = `<i class="ph-bold ph-cpu"></i> 正在调用 ${userModel} 进行推理，请保持连接...`;
+        status.innerHTML = `<i class="ph-duotone ph-spinner"></i> 连接到 ${userModel} 进行推理...`;
         downloadLink.style.display = 'none';
         fileNameDisplay.style.opacity = '0.5';
 
         try {
+            // 模拟 API 请求 (你需要保留你原有的后端逻辑)
             const response = await fetch('/upload', {
                 method: 'POST',
                 body: formData
@@ -344,19 +460,19 @@
             
             if (result.success) {
                 status.className = 'status-success';
-                status.innerHTML = '<i class="ph-bold ph-check-circle"></i> 翻译任务执行完毕！';
+                status.innerHTML = '🎉 翻译完成啦！';
                 downloadLink.href = result.downloadUrl;
                 downloadLink.style.display = 'inline-block';
-                downloadLink.innerHTML = `<i class="ph-bold ph-download-simple"></i> 下载译文: ${result.downloadUrl.split('/').pop()}`;
+                downloadLink.innerHTML = `<span class="emoji-icon">📥</span> 下载译文 (${result.downloadUrl.split('/').pop()})`;
             } else {
                 throw new Error(result.message);
             }
         } catch (error) {
             status.className = 'status-error';
-            status.innerHTML = `<i class="ph-bold ph-warning-circle"></i> 任务失败: ${error.message || '网络连接异常'}`;
+            status.innerHTML = `😖 哎呀出错啦: ${error.message || '网络连接有点问题'}`;
         } finally {
             btn.disabled = false;
-            btn.innerHTML = '<i class="ph-bold ph-rocket-launch"></i> 启动神经翻译引擎';
+            btn.innerHTML = '<span class="emoji-icon">🚀</span> 再次启动魔法翻译';
             fileNameDisplay.style.opacity = '1';
         }
     }
